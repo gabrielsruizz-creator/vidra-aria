@@ -50,3 +50,14 @@ describe("formatação pt-BR", () => {
     expect(formatCnpj("11222333000181")).toBe("11.222.333/0001-81");
   });
 });
+
+describe("toInputDecimal", () => {
+  it("gera texto editável compatível com o parser", async () => {
+    const { parseDecimalBR } = await import("./parse");
+    const { toInputDecimal } = await import("./format");
+    expect(toInputDecimal("1234.5000")).toBe("1234,5");
+    expect(toInputDecimal(1500)).toBe("1500");
+    expect(toInputDecimal(null)).toBe("");
+    expect(parseDecimalBR(toInputDecimal("1234.5000"))).toBe("1234.5");
+  });
+});

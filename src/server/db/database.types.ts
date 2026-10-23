@@ -3,6 +3,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
+  __InternalSupabase: { PostgrestVersion: "12.2.3" };
   public: {
     Tables: {
       audit_log: {
@@ -41,6 +42,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       company_settings: {
         Row: {
@@ -84,6 +86,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       customers: {
         Row: {
@@ -154,6 +157,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       labor_rates: {
         Row: {
@@ -191,6 +195,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       material_categories: {
         Row: {
@@ -228,6 +233,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       material_price_history: {
         Row: {
@@ -311,6 +317,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       materials: {
         Row: {
@@ -394,6 +401,7 @@ export type Database = {
             referencedColumns: ["code"];
           },
         ];
+        ComputedFields: never;
       };
       overhead_rates: {
         Row: {
@@ -434,6 +442,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       product_categories: {
         Row: {
@@ -468,6 +477,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       product_components: {
         Row: {
@@ -534,6 +544,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       product_labor_operations: {
         Row: {
@@ -594,6 +605,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       product_lines: {
         Row: {
@@ -628,6 +640,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       product_versions: {
         Row: {
@@ -693,6 +706,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       products: {
         Row: {
@@ -756,6 +770,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       profiles: {
         Row: {
@@ -796,6 +811,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       quote_cost_snapshots: {
         Row: {
@@ -903,6 +919,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       quote_items: {
         Row: {
@@ -997,6 +1014,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       quote_snapshot_items: {
         Row: {
@@ -1109,6 +1127,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       quote_snapshot_lines: {
         Row: {
@@ -1247,6 +1266,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       quote_snapshot_purchase_needs: {
         Row: {
@@ -1333,6 +1353,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       quotes: {
         Row: {
@@ -1450,6 +1471,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       sale_deduction_rates: {
         Row: {
@@ -1490,6 +1512,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       supplier_contacts: {
         Row: {
@@ -1543,6 +1566,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       supplier_material_offers: {
         Row: {
@@ -1634,6 +1658,7 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+        ComputedFields: never;
       };
       suppliers: {
         Row: {
@@ -1677,6 +1702,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
       units: {
         Row: {
@@ -1717,6 +1743,7 @@ export type Database = {
         };
         Relationships: [
         ];
+        ComputedFields: never;
       };
     };
     Views: { [_ in never]: never };

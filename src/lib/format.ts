@@ -120,3 +120,14 @@ export function formatMillimeters(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—";
   return `${formatNumber(value, { decimals: 0 })} mm`;
 }
+
+/**
+ * Valor para preencher campos de formulário: vírgula decimal, sem separador de
+ * milhar e sem zeros à direita ("1234,5"). Compatível com parseDecimalBR.
+ */
+export function toInputDecimal(value: DecimalInput | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "";
+  const s = dec(value).toFixed();
+  const trimmed = s.includes(".") ? s.replace(/0+$/, "").replace(/\.$/, "") : s;
+  return trimmed.replace(".", ",");
+}

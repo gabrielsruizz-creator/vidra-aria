@@ -113,6 +113,7 @@ out.push("");
 out.push("export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];");
 out.push("");
 out.push("export type Database = {");
+out.push('  __InternalSupabase: { PostgrestVersion: "12.2.3" };');
 out.push("  public: {");
 out.push("    Tables: {");
 for (const [table, cols] of tables) {
@@ -144,6 +145,7 @@ for (const [table, cols] of tables) {
     out.push("          },");
   }
   out.push("        ];");
+  out.push("        ComputedFields: never;");
   out.push("      };");
 }
 out.push("    };");
