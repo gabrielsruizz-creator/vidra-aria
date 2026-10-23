@@ -5,6 +5,9 @@
 import type { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { calculateQuote } from "@/domain/costing/engine";
+import { toSnapshotPayload } from "@/server/services/quote-calculation";
+
 import { DATABASE_URL, asUser, connect, createUser, expectFailure, lookupId, type TestUser } from "./helpers";
 
 describe.skipIf(!DATABASE_URL)("banco de dados", () => {
@@ -447,6 +450,87 @@ describe.skipIf(!DATABASE_URL)("banco de dados", () => {
       await expect(asUser(db, vendedor, (q) => q("delete from quotes where id = $1", [quoteId]))).rejects.toThrow(
         /não podem ser excluídos/,
       );
+    });
+
+    it("persiste o resultado real do motor de custos", async () => {
+      const { quoteId, itemId } = await asUser(db, vendedor, async (q) => {
+        const quote = await q(
+          "insert into quotes (customer_id, target_margin_percent, freight_amount) values ($1, 30, 50) returning id",
+          [customerId],
+        );
+        const item = await q(
+          `insert into quote_items (quote_id, position, product_id, product_version_id, width_mm, height_mm, quantity)
+           values ($1, 1, $2, $3, 1200, 800, 3) returning id`,
+          [quote.rows[0].id, productId, versionId],
+        );
+        return { quoteId: quote.rows[0].id as string, itemId: item.rows[0].id as string };
+      });
+
+      const input = {
+        items: [
+          {
+            quoteItemId: itemId, position: 1, description: null, widthMm: 1200, heightMm: 800, quantity: "3",
+            includeInstallation: false, extraCost: "0",
+            version: {
+              id: versionId, productId, productCode: "P-QUOTE", productName: "Produto orçamento", versionNumber: 1,
+              requiresDimensions: true, minWidthMm: null, maxWidthMm: null, minHeightMm: null, maxHeightMm: null,
+              components: [
+                { id: "00000000-0000-0000-0000-0000000000c1", position: 1, materialId, description: null, quantityBasis: "area" as const, coefficient: "1", offsetMm: "0", wastePercent: "8" },
+              ],
+              laborOperations: [],
+            },
+          },
+        ],
+        materials: {
+          [materialId]: {
+            materialId, code: "VID-8", description: "Vidro", warnings: [],
+            consumptionUnit: { code: "m2", symbol: "m²", dimension: "area" as const, factorToBase: "1" },
+            offer: {
+              id: offerId, supplierId: "00000000-0000-0000-0000-000000000000", supplierName: "Fornecedor vidros",
+              purchaseUnitCode: "m2", packageQuantity: "1", purchaseUnitCost: "150", unitCost: "150",
+              quotedAt: "2026-10-01", validUntil: null, freshness: "vigente" as const,
+            },
+          },
+        },
+        laborRates: {},
+        overheadRates: [],
+        saleDeductions: [],
+        parameters: { targetMarginPercent: "30", discountPercent: "0", freightAmount: "50", otherCostsAmount: "0" },
+      };
+      // Referências a ids inexistentes seriam barradas pelas FKs: usa o fornecedor real da oferta.
+      const sup = await db.query("select supplier_id from supplier_material_offers where id = $1", [offerId]);
+      input.materials[materialId].offer.supplierId = sup.rows[0].supplier_id;
+
+      const result = calculateQuote(input);
+      if (!result.ok) throw new Error(result.errors.join("; "));
+      const p = toSnapshotPayload(input, result);
+
+      await asUser(db, vendedor, (q) =>
+        q("select public.save_quote_calculation($1, $2, $3, $4, $5)", [
+          quoteId,
+          JSON.stringify(p.snapshot),
+          JSON.stringify(p.items),
+          JSON.stringify(p.lines),
+          JSON.stringify(p.needs),
+        ]),
+      );
+
+      const saved = await db.query(
+        `select s.material_cost::text, s.total_cost::text, s.final_price::text, s.net_margin_percent::text,
+                (select count(*)::int from quote_snapshot_lines l where l.snapshot_id = s.id) as lines,
+                (select purchase_quantity::text from quote_snapshot_purchase_needs n where n.snapshot_id = s.id) as purchase
+         from quote_cost_snapshots s join quotes q on q.current_snapshot_id = s.id where q.id = $1`,
+        [quoteId],
+      );
+      // 1,2 × 0,8 × 3 = 2,88 m² × 1,08 = 3,1104 m² × 150 = 466,56
+      expect(saved.rows[0]).toEqual({
+        material_cost: "466.56",
+        total_cost: result.totals.totalCost.toFixed(2),
+        final_price: result.totals.finalPrice.toFixed(2),
+        net_margin_percent: result.totals.netMarginPercent.toFixed(4),
+        lines: result.lines.length,
+        purchase: "4.000000",
+      });
     });
 
     it("rejeita cálculo que não cobre todos os itens", async () => {
